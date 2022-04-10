@@ -14,7 +14,7 @@
 
 <ul><h3>Business Model</h3>
 <li><b>Nitin Gadkari (Minister of Road Transport and Highways of India)</b> has already asked for a device that can detect drowsiness of truck's drivers <br>
-<img src="motivation.png" width=60% height=60%/></li>
+<img src="motivation.png" width=80% height=80%/></li>
 <li>Subscription Model and Device Price have already attracted lots of truck's owners</li>
 <li>Directly handshake with Automobile Industries</li>
 </ul>
