@@ -137,8 +137,8 @@ def isOpen(image, face_mesh_results, face_part, threshold=5, display=True):
 def main(frame):
     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
     face_mesh_results = detectFacialLandmarks(frame, face_mesh_videos, display=False)
-    eye_ratio = ""
-    mouth_ratio = ""
+    eye_ratio = 0
+    mouth_ratio = 0
     try:
         if face_mesh_results.multi_face_landmarks:
             mesh_coords = landmarksDetection(frame, face_mesh_results, False)
@@ -149,6 +149,6 @@ def main(frame):
         return mouth_ratio, eye_ratio
     except Exception as e:
         print(f"error : {e}")
-        eye_ratio = ""
-        mouth_ratio = ""
+        eye_ratio = 0
+        mouth_ratio = 0
         return mouth_ratio, eye_ratio

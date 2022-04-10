@@ -37,15 +37,6 @@ def main(image):
                     face_3d.append([x, y, lm.z])
                     # Convert it to the NumPy array
             face_2d = np.array(face_2d, dtype=np.float64)
-            for x,y in face_2d:
-                print(f"x : {x} and y : {y}")
-                center = (int(x),int(y))
-                radius = 2
-                color = (0, 255, 0)
-                thickness = -1
-                cv2.circle(image, center, radius, color, thickness)
-            print(f"len of face_2d : {face_2d}")
-            print(f"values of face_2d : {face_2d}")
             # Convert it to the NumPy array
             face_3d = np.array(face_3d, dtype=np.float64)
             # The camera matrix
