@@ -40,7 +40,7 @@ def eye_main(params):
     if params['glass_text'] == 'glass':
         if eye_with_glass(params):
             if params['eye_close_flag'] == False:
-                print("FIRST ROUND STARTED")
+                print("FIRST ROUND STARTED OF EYE")
                 params['eye_close_flag'] = True
                 params['eye_close_time_stamp'] = time.time()
             else:
@@ -53,7 +53,7 @@ def eye_main(params):
     else:
         if eye_without_glass(params):
             if params['eye_close_flag'] == False:
-                print("FIRST ROUND STARTED")
+                print("FIRST ROUND STARTED OF EYE")
                 params['eye_close_flag'] = True
                 params['eye_close_time_stamp'] = time.time()
             else:
@@ -65,7 +65,7 @@ def eye_main(params):
             return params
 
     if params['eye_close_flag'] == True:
-        print("FIRST ROUND CLOSED")
+        print("FIRST ROUND CLOSED OF EYE")
         print(f"time : {time.time() - params['eye_close_time_stamp']}")
         params['eye_close_flag'] = False
         params['eye_time_stamp'].append(params['eye_close_time_stamp'])
