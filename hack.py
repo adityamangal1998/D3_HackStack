@@ -44,6 +44,8 @@ mp_drawing_styles = mp.solutions.drawing_styles
 mp_face_mesh = mp.solutions.face_mesh
 start_time_glass = int(time.time())
 face_mesh = mp_face_mesh.FaceMesh(min_detection_confidence=0.5, min_tracking_confidence=0.5)
+counter_sleep = 0
+counter_drowsiness = 0
 with mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence=0.5) as face_detection:
     cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
     while cap.isOpened():
@@ -85,18 +87,27 @@ with mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence
                     params = calculate.mouth_calculate_main(params)
                     params = core.head_main(params)
                     params = calculate.head_calculate_main(params)
-                    if params['result_eye'] == 'sleeping':
-                        debug(f"Sleeping : {params['result_eye']}", debug_bool)
-                        break
-                    if params['result_head'] == 'sleeping':
-                        debug(f"Sleeping HEAD : {params['result_head']}", debug_bool)
-                        break
-                    if params['result_eye'] == "drowsiness":
-                        debug(f"Drowsiness EYE: {params['result_eye']}", debug_bool)
-                        params['eye_blink_stamp'] = []
-                    if params['result_mouth'] == "drowsiness":
-                        debug(f"Drowsiness MOUTH : {params['result_mouth']}", debug_bool)
-                        params['mouth_yawn_stamp'] = []
+                    original_frame = cv2.flip(original_frame, 1)
+                    if params['result_eye'] == 'sleeping' or params['result_head'] == 'sleeping':
+                        cv2.putText(original_frame, 'sleeping', (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                                    (0, 0, 255), 2)
+                        counter_sleep = counter_sleep + 1
+                    elif params['result_eye'] == "drowsiness" or params['result_mouth'] == "drowsiness":
+                        cv2.putText(original_frame, "drowsiness", (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                                    (0, 0, 255), 2)
+                        counter_drowsiness = counter_drowsiness + 1
+                    if 100 > counter_sleep > 0:
+                        cv2.putText(original_frame, 'sleeping', (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                                    (0, 0, 255), 2)
+                        counter_sleep = counter_sleep + 1
+                    elif 100 > counter_drowsiness > 0:
+                        cv2.putText(original_frame, "drowsiness", (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                                    (0, 0, 255), 2)
+                        counter_drowsiness = counter_drowsiness + 1
+                    if counter_drowsiness > 100:
+                        counter_drowsiness = 0
+                    if counter_sleep > 100:
+                        counter_sleep = 0
         except Exception as e:
             print(f"error : {e}")
             params['head_text'] = 'processing head'
@@ -104,7 +115,6 @@ with mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence
             params['person_text'] = 'processing person'
             params['eye_ratio'] = 'processing eye'
             params['mouth_ratio'] = 'processing mouth'
-        image = cv2.flip(image, 1)
 
         cv2.putText(canvas, "head -> " + params['head_text_1'], (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         cv2.putText(canvas, "wearing-> " + params['glass_text'], (20, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
@@ -114,7 +124,7 @@ with mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence
                     (0, 0, 255), 2)
         cv2.imshow('canvas', canvas)
         cv2.imshow('head image', head_img)
-        cv2.imshow('person', cv2.flip(original_frame, 1))
+        cv2.imshow('person', original_frame)
         cv2.imshow('facemesh_tesselation', cv2.flip(facemesh_tesselation, 1))
         cv2.imshow('facemesh_contours', cv2.flip(facemesh_contours, 1))
 
