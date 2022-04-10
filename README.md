@@ -17,3 +17,5 @@
 <li>Subscription Model and Device Price have already attracted lots of truck's owners</li>
 <li>Directly handshake with Automobile Industries</li>
 </ul>
+
+![alt text](img.png)
