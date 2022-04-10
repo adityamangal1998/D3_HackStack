@@ -12,7 +12,7 @@ drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
 
 
 def main(image):
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
     image.flags.writeable = False
     results = face_mesh.process(image)
     image.flags.writeable = True
@@ -78,4 +78,4 @@ def main(image):
                 text = "Forward"
 
     # return text,x,y
-    return text,x,y,image
+    return text,x,y
