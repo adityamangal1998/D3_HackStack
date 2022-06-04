@@ -17,6 +17,7 @@ def process_eye_blink_counter(eye_blink_stamp):
                     eye_blink_counter = eye_blink_counter + 1
     if eye_blink_counter > 5:
         result = "drowsiness"
+        new_eye_blink_stamp = []
     return result, new_eye_blink_stamp
 
 
@@ -62,6 +63,7 @@ def process_mouth_yawn_counter(mouth_yawn_stamp):
                     mouth_yawn_counter = mouth_yawn_counter + 1
     if mouth_yawn_counter > 2:
         result = "drowsiness"
+        new_mouth_yawn_stamp = []
     return result, new_mouth_yawn_stamp
 
 
