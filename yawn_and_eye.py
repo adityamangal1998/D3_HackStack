@@ -6,7 +6,7 @@ import itertools
 import math
 import matplotlib.pyplot as plt
 from utils import debug
-
+import utils
 debug_bool = True
 
 mp_face_mesh = mp.solutions.face_mesh
@@ -64,8 +64,8 @@ def blinkRatio(img, landmarks, right_indices, left_indices):
     rv_top = landmarks[right_indices[12]]
     rv_bottom = landmarks[right_indices[4]]
     # draw lines on right eyes
-    # cv.line(img, rh_right, rh_left, utils.GREEN, 2)
-    # cv.line(img, rv_top, rv_bottom, utils.WHITE, 2)
+    # cv2.line(img, rh_right, rh_left, utils.GREEN, 2)
+    # cv2.line(img, rv_top, rv_bottom, utils.WHITE, 2)
 
     # LEFT_EYE
     # horizontal line
@@ -134,7 +134,7 @@ def isOpen(image, face_mesh_results, face_part, threshold=5, display=True):
     return output_image, status,(height / face_height) * 100
 
 
-def main(frame):
+def main(frame,eye_frame,mouth_frame):
     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
     face_mesh_results = detectFacialLandmarks(frame, face_mesh_videos, display=False)
     eye_ratio = 0
@@ -143,12 +143,43 @@ def main(frame):
         if face_mesh_results.multi_face_landmarks:
             mesh_coords = landmarksDetection(frame, face_mesh_results, False)
             eye_ratio = blinkRatio(frame, mesh_coords, RIGHT_EYE, LEFT_EYE)
+            left_eye_x = []
+            left_eye_y = []
+            right_eye_x = []
+            right_eye_y = []
+            mouth_x = []
+            mouth_y = []
+            for index in range(len(mesh_coords)):
+                if index in LEFT_EYE:
+                    left_eye_x.append(mesh_coords[index][0])
+                    left_eye_y.append(mesh_coords[index][1])
+                if index in RIGHT_EYE:
+                    right_eye_x.append(mesh_coords[index][0])
+                    right_eye_y.append(mesh_coords[index][1])
+                if index in LIPS:
+                    mouth_x.append(mesh_coords[index][0])
+                    mouth_y.append(mesh_coords[index][1])
+            min_x = min(min(left_eye_x),min(right_eye_x))
+            min_y = min(min(left_eye_y),min(right_eye_y))
+            max_x = max(max(left_eye_x),max(right_eye_x))
+            max_y = max(max(left_eye_y),max(right_eye_y))
+            offset_eye = 10
+            eye_frame = frame[min_y-offset_eye:max_y+offset_eye,min_x-offset_eye:max_x+offset_eye]
+            eye_frame = cv2.resize(eye_frame, (300, 150))
+            min_x = min(mouth_x)
+            min_y = min(mouth_y)
+            max_x = max(mouth_x)
+            max_y = max(mouth_y)
+            offset_mouth = 10
+            mouth_frame = frame[min_y - offset_mouth:max_y + offset_mouth, min_x - offset_mouth:max_x + offset_mouth]
+            mouth_frame = cv2.resize(mouth_frame, (300, 150))
             frame, status, mouth_ratio = isOpen(frame, face_mesh_results, 'MOUTH', threshold=25, display=False)
+
             # debug(f"threshold : {4.2} Eye ratio : {eye_ratio}", debug_bool)
             # debug(f"threshold : {25} Mouth ratio : {mouth_ratio}", debug_bool)
-        return mouth_ratio, eye_ratio
+        return mouth_ratio, eye_ratio,eye_frame,mouth_frame
     except Exception as e:
         print(f"error : {e}")
         eye_ratio = 0
         mouth_ratio = 0
-        return mouth_ratio, eye_ratio
+        return mouth_ratio, eye_frame,mouth_frame

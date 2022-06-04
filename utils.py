@@ -15,6 +15,7 @@ TEXT_SCALE = 1.0
 TEXT_THICKNESS = 1
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
+GREEN = (0, 255, 0)
 if os.getenv('LOG_LEVEL') == 'DEBUG':
     level = logging.DEBUG
 elif os.getenv('LOG_LEVEL') == 'INFO':
@@ -29,7 +30,7 @@ logging.basicConfig(
         datefmt='%Y-%m-%d %H:%M:%S'
         )
 logger = logging.getLogger(__name__)
-
+LEFT_EYE = [362, 382, 381, 380, 374, 373, 390, 249, 263, 466, 388, 387, 386, 385, 384, 398]
 def timeit(method):
     def timed(*args, **kw):
         ts = time.time()
