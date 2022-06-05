@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from skimage.measure import compare_ssim as ssim
 
 # reading the video, can also stream via webcam.
-cap = cv2.VideoCapture('./data/video1(1).mp4')
+cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
 # flags
 pupil_flag = False
