@@ -59,8 +59,12 @@ with mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence
         facemesh_contours.fill(255)
         head_img = np.zeros([300, 300, 3], dtype=np.uint8)
         head_img.fill(255)
-        canvas = np.zeros([250, 800, 3], dtype=np.uint8)
-        canvas.fill(0)
+        Eye_val_img = np.zeros([300, 800, 3], dtype=np.uint8)
+        Eye_val_img.fill(0)
+        Mouth_val_img = np.zeros([300, 800, 3], dtype=np.uint8)
+        Mouth_val_img.fill(0)
+        Head_val_img = np.zeros([300, 800, 3], dtype=np.uint8)
+        Head_val_img.fill(0)
         try:
             results = face_detection.process(image)
             img_original = image.copy()
@@ -89,25 +93,28 @@ with mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence
                     params = calculate.head_calculate_main(params)
                     original_frame = cv2.flip(original_frame, 1)
                     if params['result_eye'] == 'sleeping' or params['result_head'] == 'sleeping':
-                        cv2.putText(original_frame, 'sleeping', (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                        cv2.putText(original_frame, 'sleeping', (20, 50), cv2.FONT_HERSHEY_TRIPLEX, 1,
                                     (0, 0, 255), 2)
                         counter_sleep = counter_sleep + 1
-                    elif params['result_eye'] == "drowsiness" or params['result_mouth'] == "drowsiness":
-                        cv2.putText(original_frame, "drowsiness", (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                    if params['result_eye'] == "drowsiness" or params['result_mouth'] == "drowsiness":
+                        cv2.putText(original_frame, "drowsiness", (20, 50), cv2.FONT_HERSHEY_TRIPLEX, 1,
                                     (0, 0, 255), 2)
                         counter_drowsiness = counter_drowsiness + 1
                     if 100 > counter_sleep > 0:
-                        cv2.putText(original_frame, 'sleeping', (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                        cv2.putText(original_frame, 'sleeping', (20, 50),cv2.FONT_HERSHEY_TRIPLEX, 1,
                                     (0, 0, 255), 2)
                         counter_sleep = counter_sleep + 1
-                    elif 100 > counter_drowsiness > 0:
-                        cv2.putText(original_frame, "drowsiness", (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                    if 50 > counter_drowsiness > 0:
+                        cv2.putText(original_frame, "drowsiness", (20, 50), cv2.FONT_HERSHEY_TRIPLEX, 1,
                                     (0, 0, 255), 2)
                         counter_drowsiness = counter_drowsiness + 1
-                    if counter_drowsiness > 100:
+                    if counter_drowsiness > 50:
                         counter_drowsiness = 0
                     if counter_sleep > 100:
                         counter_sleep = 0
+                    params['result_eye'] == ''
+                    params['result_head'] == ''
+
         except Exception as e:
             print(f"error : {e}")
             params['head_text'] = 'processing head'
@@ -116,17 +123,50 @@ with mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence
             params['eye_ratio'] = 'processing eye'
             params['mouth_ratio'] = 'processing mouth'
 
-        cv2.putText(canvas, "head -> " + params['head_text_1'], (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-        cv2.putText(canvas, "wearing-> " + params['glass_text'], (20, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-        cv2.putText(canvas, "eye ratio -> " + str(params['eye_ratio']), (20, 150), cv2.FONT_HERSHEY_SIMPLEX, 1,
-                    (0, 0, 255), 2)
-        cv2.putText(canvas, "mouth ratio -> " + str(params['mouth_ratio']), (20, 200), cv2.FONT_HERSHEY_SIMPLEX, 1,
-                    (0, 0, 255), 2)
-        cv2.imshow('canvas', canvas)
+        # cv2.putText(Eye_val_img, "Head -> " + params['head_text_1'], (40, 50), cv2.FONT_HERSHEY_TRIPLEX, 1, (0, 0, 255), 2)
+        # cv2.putText(canvas, "Wearing-> " + params['glass_text'], (40, 110), cv2.FONT_HERSHEY_TRIPLEX, 1, (0, 0, 255), 2)
+        # cv2.putText(canvas, "Eye ratio -> " + str(params['eye_ratio']), (40, 170), cv2.FONT_HERSHEY_TRIPLEX, 1,
+        #             (0, 0, 255), 2)
+        # cv2.putText(canvas, "Mouth ratio -> " + str(params['mouth_ratio']), (40, 230), cv2.FONT_HERSHEY_TRIPLEX, 1,
+        #             (0, 0, 255), 2)
+
+        # $$____$$   Cal_img
+        # Eye
+        cv2.putText(Eye_val_img, " Blink Trigger Time  -> " + str(params['eye_close_time_stamp']), (40, 50), cv2.FONT_HERSHEY_TRIPLEX, 1, (0, 0, 255), 2)
+        cv2.putText(Eye_val_img, " Eye Blink Time -> " + str(time.time() - params['eye_close_time_stamp']), (40, 90), cv2.FONT_HERSHEY_TRIPLEX,
+                    1, (0, 0, 255), 2)
+        cv2.putText(Eye_val_img, " Blink count -> " + str(len(params['eye_blink_stamp'])), (40, 130),
+                    cv2.FONT_HERSHEY_TRIPLEX,
+                    1, (0, 0, 255), 2)
+        # Mouth
+        cv2.putText(Mouth_val_img, " Yawn Trigger Time  -> " + str(params['mouth_open_time_stamp']), (40, 50),
+                    cv2.FONT_HERSHEY_TRIPLEX, 1, (0, 0, 255), 2)
+        cv2.putText(Mouth_val_img, " Yawn Time -> " + str(time.time() - params['mouth_open_time_stamp']), (40, 90),
+                    cv2.FONT_HERSHEY_TRIPLEX,
+                    1, (0, 0, 255), 2)
+        cv2.putText(Mouth_val_img, " Yawn count -> " + str(len(params['mouth_yawn_stamp'])), (40, 130),
+                    cv2.FONT_HERSHEY_TRIPLEX,
+                    1, (0, 0, 255), 2)
+        # Head
+        cv2.putText(Head_val_img, " Head down Trigger Time  -> " + str(params['head_down_time_stamp']), (40, 50),
+                    cv2.FONT_HERSHEY_TRIPLEX, 1, (0, 0, 255), 2)
+        cv2.putText(Head_val_img, " Head Down Time -> " + str(time.time() - params['head_down_time_stamp']), (40, 90),
+                    cv2.FONT_HERSHEY_TRIPLEX,
+                    1, (0, 0, 255), 2)
+        cv2.putText(Head_val_img, " Head Down count -> " + str(len(params['head_time_stamp'])), (40, 130),
+                    cv2.FONT_HERSHEY_TRIPLEX,
+                    1, (0, 0, 255), 2)
+
+        # $$___$$    Windows
+
+        # cv2.imshow('canvas', canvas)
         cv2.imshow('head image', head_img)
         cv2.imshow('person', original_frame)
         cv2.imshow('facemesh_tesselation', cv2.flip(facemesh_tesselation, 1))
-        cv2.imshow('facemesh_contours', cv2.flip(facemesh_contours, 1))
+        cv2.imshow('Head_val_img',Head_val_img)
+        cv2.imshow('Eye_val_img', Eye_val_img)
+        cv2.imshow('Mouth_val_img', Mouth_val_img)
+        # cv2.imshow('facemesh_contours', cv2.flip(facemesh_contours, 1))
 
         if cv2.waitKey(5) & 0xFF == 27:
             break
