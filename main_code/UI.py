@@ -24,25 +24,25 @@ ctypes.windll.shcore.SetProcessDpiAwareness(1)
 
 root = Tk()
 root.resizable(False, False)
-root.geometry("1700x980")
+root.geometry("1900x980")
 root.title("D3")
 root.iconbitmap('images/ico.ico')
 
 
 # title label
 bg_title = Image.open('images/title.png')
-bg_title = bg_title.resize((1700, 80), Image.ANTIALIAS)
+bg_title = bg_title.resize((1900, 80), Image.ANTIALIAS)
 bg_title = ImageTk.PhotoImage(bg_title)
 title_label = Label(root,  image=bg_title, bg='black')
-title_label.place(x=0, y=0, width=1700, height=80)
+title_label.place(x=0, y=0, width=1900, height=80)
 
 
 #  main Label
 bg_main = Image.open('images/bg_p.png')
-bg_main = bg_main.resize((1700, 880), Image.ANTIALIAS)
+bg_main = bg_main.resize((1900, 880), Image.ANTIALIAS)
 bg_main = ImageTk.PhotoImage(bg_main)
 main_frame = Label(root, bg='black')
-main_frame.place(x=0, y=80, height=900, width=1700)
+main_frame.place(x=0, y=80, height=900, width=1900)
 
 # cropped Face image window
 
@@ -87,10 +87,10 @@ headBound_window.place(x=1100, y=600, height=300, width=300)
 # headposDetail cam window
 
 bg_headPosDetail = Image.open('images/face.png')
-bg_headPosDetail = bg_headPosDetail.resize((300, 300), Image.ANTIALIAS)
+bg_headPosDetail = bg_headPosDetail.resize((500, 500), Image.ANTIALIAS)
 bg_headPosDetail = ImageTk.PhotoImage(bg_headPosDetail)
 headPosDetail_window = Label(main_frame, image=bg_headPosDetail)
-headPosDetail_window.place(x=1400, y=600, height=300, width=300)
+headPosDetail_window.place(x=1400, y=600, height=300, width=500)
 
 # person cam window
 
@@ -121,18 +121,18 @@ mouthGraph_window.place(x=1100, y=300, height=300, width=300)
 # mouthGraph Detail cam window
 
 bg_mouthGraphDetail = Image.open('images/face.png')
-bg_mouthGraphDetail = bg_mouthGraphDetail.resize((300, 300), Image.ANTIALIAS)
+bg_mouthGraphDetail = bg_mouthGraphDetail.resize((500, 500), Image.ANTIALIAS)
 bg_mouthGraphDetail = ImageTk.PhotoImage(bg_mouthGraphDetail)
 mouthGraphDetail_window = Label(main_frame, image=bg_mouthGraphDetail)
-mouthGraphDetail_window.place(x=1400, y=300, height=300, width=300)
+mouthGraphDetail_window.place(x=1400, y=300, height=300, width=500)
 
 # eyeGraph Detail window
 
 bg_eyeGraphDetail = Image.open('images/face.png')
-bg_eyeGraphDetail = bg_eyeGraphDetail.resize((300, 300), Image.ANTIALIAS)
+bg_eyeGraphDetail = bg_eyeGraphDetail.resize((500, 500), Image.ANTIALIAS)
 bg_eyeGraphDetail = ImageTk.PhotoImage(bg_eyeGraphDetail)
 eyeGraphDetail_window = Label(main_frame, image=bg_eyeGraphDetail)
-eyeGraphDetail_window.place(x=1400, y=0, height=300, width=300)
+eyeGraphDetail_window.place(x=1400, y=0, height=300, width=500)
 
 
 # # outline cam window
@@ -200,7 +200,7 @@ def display():
     scale_graph_line = 50
     graph_eye = Graph(60*scale_graph, 60*scale_graph)
     graph_mouth = Graph(60*scale_graph, 60*scale_graph)
-
+    ft_color = (57, 181, 74)
     with mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence=0.5) as face_detection:
         cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
         cap.set(3, 800)
@@ -215,9 +215,11 @@ def display():
             facemesh_contours = np.zeros([300, 300, 3], dtype=np.uint8)
             facemesh_contours.fill(0)
             head_img = np.zeros([300, 300, 3], dtype=np.uint8)
-            head_img.fill(255)
+            head_img.fill(0)
             canvas = np.zeros([300, 800, 3], dtype=np.uint8)
             canvas.fill(0)
+            head_bound = np.zeros([300, 300, 3], dtype=np.uint8)
+            head_bound.fill(0)
             graph_eye_canvas = np.zeros(
                 [60 * scale_graph, 60 * scale_graph, 3], dtype=np.uint8)
             graph_eye_canvas.fill(0)
@@ -228,6 +230,12 @@ def display():
             eye_frame.fill(0)
             mouth_frame = np.zeros([300, 150, 3], dtype=np.uint8)
             mouth_frame.fill(0)
+            Eye_val_img = np.zeros([300, 600, 3], dtype=np.uint8)
+            Eye_val_img.fill(0)
+            Mouth_val_img = np.zeros([300, 600, 3], dtype=np.uint8)
+            Mouth_val_img.fill(0)
+            Head_val_img = np.zeros([300, 600, 3], dtype=np.uint8)
+            Head_val_img.fill(0)
             try:
                 results = face_detection.process(image)
                 img_original = image.copy()
@@ -244,7 +252,7 @@ def display():
                             start_time_glass = time.time()
                             # glass_text = glass_main.main(img_original.copy())
                             # params['glass_text'] = glass_text
-                        params['head_text_1'], head_img, facemesh_tesselation, facemesh_contours = head_hack.main(
+                        params['head_text_1'], head_img, facemesh_tesselation, facemesh_contours, head_bound = head_hack.main(
                             img_original.copy())
                         params['head_text_2'], head_x, head_y = head_main.main(
                             original_frame.copy())
@@ -311,22 +319,53 @@ def display():
             danger_color = (0, 0, 255)
 
             cv2.putText(canvas, "Head : " + params['head_text_1'],
-                        (20, 50), cv2.FONT_HERSHEY_DUPLEX, 1, safe_color, 1)
+                        (20, 50), cv2.FONT_HERSHEY_PLAIN, 2, safe_color, 1)
             cv2.putText(canvas, "wearing : " + params['glass_text'],
-                        (20, 100), cv2.FONT_HERSHEY_DUPLEX, 1, safe_color, 1)
-            cv2.putText(canvas, "Eye Ratio : " + str(params['eye_ratio']), (20, 150), cv2.FONT_HERSHEY_DUPLEX, 1,
+                        (20, 100), cv2.FONT_HERSHEY_PLAIN, 2, safe_color, 1)
+            cv2.putText(canvas, "Eye Ratio : " + str(params['eye_ratio']), (20, 150), cv2.FONT_HERSHEY_PLAIN, 2,
                         safe_color, 1)
-            cv2.putText(canvas, "Mouth Ratio : " + str(params['mouth_ratio']), (20, 200), cv2.FONT_HERSHEY_DUPLEX, 1,
+            cv2.putText(canvas, "Mouth Ratio : " + str(params['mouth_ratio']), (20, 200), cv2.FONT_HERSHEY_PLAIN, 2,
                         safe_color, 1)
-            # cv2.imshow('canvas', canvas)
-            # cv2.imshow('head image', head_img)
-            # cv2.imshow('person', original_frame)
-            # cv2.imshow('facemesh_tesselation', cv2.flip(facemesh_tesselation, 1))
-            # cv2.imshow('facemesh_contours', cv2.flip(facemesh_contours, 1))
-            # cv2.imshow('eye_graph_canvas', graph_eye_canvas)
-            # cv2.imshow('mouth_graph_canvas', graph_mouth_canvas)
 
-            ### UI section starts ###
+            # $$____$$   Cal_img
+            # Eye
+            cv2.putText(Eye_val_img, " Blink Trigger Time  : " + str(
+                params['eye_close_time_stamp']), (40, 30), cv2.FONT_HERSHEY_PLAIN, 2, safe_color, 1)
+            cv2.putText(Eye_val_img, " Eye Blink Time : " + str(time.time() - params['eye_close_time_stamp']), (40, 90), cv2.FONT_HERSHEY_PLAIN,
+                        2, safe_color, 1)
+            cv2.putText(Eye_val_img, " Blink count : " + str(len(params['eye_blink_stamp'])), (40, 150),
+                        cv2.FONT_HERSHEY_PLAIN,
+                        2, safe_color, 1)
+            # Mouth
+            cv2.putText(Mouth_val_img, " Yawn Trigger Time  : " + str(params['mouth_open_time_stamp']), (40, 30),
+                        cv2.FONT_HERSHEY_PLAIN, 2, safe_color, 1)
+            cv2.putText(Mouth_val_img, " Yawn Time : " + str(time.time() - params['mouth_open_time_stamp']), (40, 90),
+                        cv2.FONT_HERSHEY_PLAIN,
+                        2, safe_color, 1)
+            cv2.putText(Mouth_val_img, " Yawn count : " + str(len(params['mouth_yawn_stamp'])), (40, 150),
+                        cv2.FONT_HERSHEY_PLAIN,
+                        2, safe_color, 1)
+            # Head
+            cv2.putText(Head_val_img, " Head Down Trigger Time  : " + str(params['head_down_time_stamp']), (40, 30),
+                        cv2.FONT_HERSHEY_PLAIN, 2, safe_color, 1)
+            cv2.putText(Head_val_img, " Head Down Time : " + str(time.time() - params['head_down_time_stamp']), (40, 90),
+                        cv2.FONT_HERSHEY_PLAIN,
+                        2, safe_color, 1)
+            cv2.putText(Head_val_img, " Head Down count : " + str(len(params['head_time_stamp'])), (40, 150),
+                        cv2.FONT_HERSHEY_PLAIN,
+                        2, safe_color, 1)
+
+        # $$___$$    Windows
+
+        # cv2.imshow('canvas', canvas)
+        # cv2.imshow('head image', head_img)
+        # cv2.imshow('person', original_frame)
+        # cv2.imshow('facemesh_tesselation', cv2.flip(facemesh_tesselation, 1))
+        # cv2.imshow('facemesh_contours', cv2.flip(facemesh_contours, 1))
+        # cv2.imshow('eye_graph_canvas', graph_eye_canvas)
+        # cv2.imshow('mouth_graph_canvas', graph_mouth_canvas)
+
+        ### UI section starts ###
 
             # cropped Face image
             cropped_face = head_img
@@ -336,12 +375,14 @@ def display():
 
             # contour image
             contour = facemesh_contours
+            contour = cv2.flip(contour, 1)
             contour = cv2.cvtColor(contour, cv2.COLOR_BGR2RGB)
             contour_array = ImageTk.PhotoImage(Image.fromarray(contour))
             contour_window['image'] = contour_array
 
             # mesh image
             mesh = facemesh_tesselation
+            mesh = cv2.flip(mesh, 1)
             mesh = cv2.cvtColor(mesh, cv2.COLOR_BGR2RGB)
             mesh_array = ImageTk.PhotoImage(Image.fromarray(mesh))
             mesh_window['image'] = mesh_array
@@ -353,16 +394,30 @@ def display():
             canvas_window['image'] = canvas_array
 
             # headBound image
-            # headBound = cv2.flip(headBound, 1)
-            # headBound = cv2.cvtColor(headBound, cv2.COLOR_BGR2RGB)
-            # headBound_array = ImageTk.PhotoImage(Image.fromarray(headBound))
-            # headBound_window['image'] = headBound_array
+            headBound = cv2.flip(head_bound, 1)
+            headBound = cv2.cvtColor(headBound, cv2.COLOR_BGR2RGB)
+            headBound_array = ImageTk.PhotoImage(Image.fromarray(headBound))
+            headBound_window['image'] = headBound_array
 
-            # headposDetail image
-            # headPosDetail = cv2.flip(headPosDetail, 1)
-            # headPosDetail = cv2.cvtColor(headPosDetail, cv2.COLOR_BGR2RGB)
-            # headPosDetail_array = ImageTk.PhotoImage(Image.fromarray(headPosDetail))
-            # headPosDetail_window['image'] = headPosDetail_array
+            # # headposDetail image
+            headPosDetail = cv2.cvtColor(Head_val_img, cv2.COLOR_BGR2RGB)
+            headPosDetail_array = ImageTk.PhotoImage(
+                Image.fromarray(headPosDetail))
+            headPosDetail_window['image'] = headPosDetail_array
+
+            # mouthGraphDetail image
+            mouthGraphDetail = cv2.cvtColor(Mouth_val_img, cv2.COLOR_BGR2RGB)
+            mouthGraphDetail_array = ImageTk.PhotoImage(
+                Image.fromarray(mouthGraphDetail))
+            mouthGraphDetail_window['image'] = mouthGraphDetail_array
+
+            # cv2.imshow('mouth',Mouth_val_img)
+
+            # # eyeGraphDetail image
+            eyeGraphDetail = cv2.cvtColor(Eye_val_img, cv2.COLOR_BGR2RGB)
+            eyeGraphDetail_array = ImageTk.PhotoImage(
+                Image.fromarray(eyeGraphDetail))
+            eyeGraphDetail_window['image'] = eyeGraphDetail_array
 
             # person image
             person = original_frame
@@ -384,7 +439,7 @@ def display():
 
             root.update()
 
-        ##### UI section Ends ######
+            ##### UI section Ends ######
 
             if cv2.waitKey(5) & 0xFF == 27:
                 break
@@ -400,7 +455,7 @@ start_icon = start_icon.resize((130, 60), Image.ANTIALIAS)
 start_icon = ImageTk.PhotoImage(start_icon)
 start_btn = Button(title_label, command=display, image=start_icon, cursor="hand2",
                    activebackground="black",  bg='black', relief='flat')
-start_btn.place(x=1500, y=10, width=130, height=60)
+start_btn.place(x=1700, y=10, width=130, height=60)
 # print("button stop")
 # # exit Button
 # exit_icon = Image.open('exit.png')

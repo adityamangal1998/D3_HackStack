@@ -53,12 +53,29 @@ def main(img):
                 img = cv2.flip(img, 1)
 
                 ##### Head Bound Code ########
+                bound_color = (57, 181, 74)
+
+                head_bound = cv2.circle(
+                    head_bound, center, radius, (255, 0, 0), thickness)
+
+                head_bound = cv2.line(
+                    head_bound, (125, 125), (125, 175), bound_color)
+                head_bound = cv2.line(
+                    head_bound, (175, 125), (175, 175), bound_color)
+                head_bound = cv2.line(
+                    head_bound, (175, 175), (125, 175), bound_color)
+                head_bound = cv2.line(
+                    head_bound, (125, 125), (175, 125), bound_color)
+
+                # head_bound = cv2.flip(head_bound, 1)
+                # cv2.imshow('bound', head_bound)
 
                 ###############################
                 if (125 < y < 175 and x < 125) or (y > 175 and x < 125 and y >= x) or (125 > y >= x and x < 125):
                     head_pos = "Looking Right"
                     cv2.putText(img, "Looking Right", (20, 50),
                                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+
                 elif (125 < y < 175 and x > 175) or (175 < y <= x and x > 175) or (y < 125 and x > 175 and y <= x):
                     head_pos = "Looking Left"
                     cv2.putText(img, "Looking Left", (20, 50),
@@ -77,7 +94,7 @@ def main(img):
                                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
         cv2.circle(img, (150, 150), radius, color, thickness)
-        return head_pos, img, facemesh_tesselation, facemesh_contours
+        return head_pos, img, facemesh_tesselation, facemesh_contours, head_bound
     except Exception as e:
         print(f"error in head : {e}")
         return head_pos, img, facemesh_tesselation, facemesh_contours

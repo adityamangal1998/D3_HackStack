@@ -52,6 +52,7 @@ scale_graph = 5
 scale_graph_line = 50
 graph_eye = Graph(60*scale_graph, 60*scale_graph)
 graph_mouth = Graph(60*scale_graph, 60*scale_graph)
+ft_color = (57, 181, 74)
 
 with mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence=0.5) as face_detection:
     cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
@@ -68,6 +69,8 @@ with mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence
         head_img.fill(255)
         canvas = np.zeros([250, 800, 3], dtype=np.uint8)
         canvas.fill(0)
+        head_bound = np.zeros([300, 300, 3], dtype=np.uint8)
+        head_bound.fill(0)
         graph_eye_canvas = np.zeros(
             [60 * scale_graph, 60 * scale_graph, 3], dtype=np.uint8)
         graph_eye_canvas.fill(0)
@@ -94,7 +97,7 @@ with mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence
                         start_time_glass = time.time()
                         # glass_text = glass_main.main(img_original.copy())
                         # params['glass_text'] = glass_text
-                    params['head_text_1'], head_img, facemesh_tesselation, facemesh_contours = head_hack.main(
+                    params['head_text_1'], head_img, facemesh_tesselation, facemesh_contours, head_bound = head_hack.main(
                         img_original.copy())
                     params['head_text_2'], head_x, head_y = head_main.main(
                         original_frame.copy())
@@ -130,19 +133,19 @@ with mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence
                     original_frame = cv2.flip(original_frame, 1)
                     if params['result_eye'] == 'sleeping' or params['result_head'] == 'sleeping':
                         cv2.putText(original_frame, 'sleeping', (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
-                                    (0, 0, 255), 2)
+                                    ft_color, 2)
                         counter_sleep = counter_sleep + 1
                     elif params['result_eye'] == "drowsiness" or params['result_mouth'] == "drowsiness":
                         cv2.putText(original_frame, "drowsiness", (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
-                                    (0, 0, 255), 2)
+                                    ft_color, 2)
                         counter_drowsiness = counter_drowsiness + 1
                     if 100 > counter_sleep > 0:
                         cv2.putText(original_frame, 'sleeping', (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
-                                    (0, 0, 255), 2)
+                                    ft_color, 2)
                         counter_sleep = counter_sleep + 1
                     elif 100 > counter_drowsiness > 0:
                         cv2.putText(original_frame, "drowsiness", (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
-                                    (0, 0, 255), 2)
+                                    ft_color, 2)
                         counter_drowsiness = counter_drowsiness + 1
                     if counter_drowsiness > 100:
                         counter_drowsiness = 0
@@ -175,6 +178,7 @@ with mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence
         cv2.imshow('facemesh_contours', cv2.flip(facemesh_contours, 1))
         cv2.imshow('eye_graph_canvas', graph_eye_canvas)
         cv2.imshow('mouth_graph_canvas', graph_mouth_canvas)
+        cv2.imshow('bound', head_bound)
 
         # ### UI section ###
         # # original image
