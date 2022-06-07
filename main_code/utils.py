@@ -8,6 +8,7 @@ from mediapipe.framework.formats import detection_pb2
 from mediapipe.framework.formats import location_data_pb2
 import math
 import numpy as np
+from datetime import datetime
 
 ALPHA = 0.5
 FONT = cv2.FONT_HERSHEY_PLAIN
@@ -25,25 +26,30 @@ elif os.getenv('LOG_LEVEL') == 'ERROR':
 else:
     level = logging.ERROR
 logging.basicConfig(
-        level=level,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
-        )
+    level=level,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 logger = logging.getLogger(__name__)
 LEFT_EYE = [362, 382, 381, 380, 374, 373, 390, 249, 263, 466, 388, 387, 386, 385, 384, 398]
+
+
 def timeit(method):
     def timed(*args, **kw):
         ts = time.time()
         result = method(*args, **kw)
         te = time.time()
         logger = logging.getLogger(method.__name__)
-        logger.debug('{} {:.3f} sec'.format(method.__name__, te-ts))
+        logger.debug('{} {:.3f} sec'.format(method.__name__, te - ts))
         return result
+
     return timed
 
-def debug(text,debug_bool):
+
+def debug(text, debug_bool):
     if debug_bool:
         print(f"DEBUG : {text}")
+
 
 def normalized_to_pixel_coordinates(
         normalized_x: float, normalized_y: float, image_width: int,
@@ -62,6 +68,7 @@ def normalized_to_pixel_coordinates(
     x_px = min(math.floor(normalized_x * image_width), image_width - 1)
     y_px = min(math.floor(normalized_y * image_height), image_height - 1)
     return x_px, y_px
+
 
 def get_roi_face(image: np.ndarray,
                  detection: detection_pb2.Detection):
@@ -82,3 +89,7 @@ def get_roi_face(image: np.ndarray,
         relative_bounding_box.ymin + relative_bounding_box.height, image_cols,
         image_rows)
     return rect_start_point, rect_end_point
+
+
+def get_current_time():
+    return datetime.today().strftime("%I:%M:%S %p")

@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 
 def eye_without_glass(params):
     if params['head_text_1'] == "Forward":
@@ -44,7 +45,7 @@ def eye_main(params):
                 params['eye_close_flag'] = True
                 params['eye_close_time_stamp'] = time.time()
             else:
-                if time.time() - params['eye_close_time_stamp'] > 5:
+                if time.time() - params['eye_close_time_stamp'] > 2:
                     print("FIRST ROUND CLOSED OF EYE")
                     params['eye_close_flag'] = False
                     params['eye_time_stamp'].append(params['eye_close_time_stamp'])
@@ -57,7 +58,7 @@ def eye_main(params):
                 params['eye_close_flag'] = True
                 params['eye_close_time_stamp'] = time.time()
             else:
-                if time.time() - params['eye_close_time_stamp'] > 5:
+                if time.time() - params['eye_close_time_stamp'] > 2:
                     print("FIRST ROUND CLOSED OF EYE")
                     params['eye_close_flag'] = False
                     params['eye_time_stamp'].append(params['eye_close_time_stamp'])

@@ -1,5 +1,6 @@
 import time
-
+from datetime import datetime
+import utils as ut
 
 def process_eye_blink_counter(eye_blink_stamp):
     new_eye_blink_stamp = []
@@ -30,15 +31,21 @@ def eye_calculate_main(params):
         # print(f"time in calculation : {eye_time_stamp[-1] - eye_time_stamp[0]}")
         if params['eye_time_stamp'][-1] - params['eye_time_stamp'][0] > 30:
             print("EYE CLOSE FOR GREATER THAN 30 SECONDS")
+            params["last_blink_trigger_time"] = ut.get_current_time()
+            params["last_critical_blink_duration"] = str(params['eye_time_stamp'][-1] - params['eye_time_stamp'][0])[:4]+" seconds"
             params['result_eye'] = "sleeping"
         elif params['eye_time_stamp'][-1] - params['eye_time_stamp'][0] > 5:
             print("EYE CLOSE FOR GREATER THAN 5 SECONDS")
             # print(eye_time_stamp)
+            params["last_blink_trigger_time"] = ut.get_current_time()
+            params["last_critical_blink_duration"] = str(params['eye_time_stamp'][-1] - params['eye_time_stamp'][0])[:4]+" seconds"
             params['result_eye'] = "sleeping"
 
         elif params['eye_time_stamp'][-1] - params['eye_time_stamp'][0] > 1:
             print("EYE CLOSE FOR GREATER THAN 1 SECOND")
+            params["last_blink_trigger_time"] = ut.get_current_time()
             params['eye_blink_stamp'].append(params['eye_time_stamp'][-1])
+            params["last_critical_blink_duration"] = str(params['eye_time_stamp'][-1] - params['eye_time_stamp'][0])[:4]+" seconds"
             print(sorted(params['eye_blink_stamp']))
 
     params['eye_time_stamp'] = []
@@ -75,6 +82,8 @@ def mouth_calculate_main(params):
             print("MOUTH OPEN FOR GREATER THAN 1 SECOND")
             params['mouth_yawn_stamp'].append(params['mouth_time_stamp'][-1])
             print(sorted(params['mouth_yawn_stamp']))
+            params["last_yawn_trigger_time"] = ut.get_current_time()
+            params["last_critical_yawn_duration"] = str(params['mouth_time_stamp'][-1] - params['mouth_time_stamp'][0])[:4] + " seconds"
 
     params['mouth_time_stamp'] = []
     if params['result_mouth'] == "":
@@ -90,5 +99,8 @@ def head_calculate_main(params):
         if params['head_time_stamp'][-1] - params['head_time_stamp'][0] > 8:
             print("HEAD DOWN FOR GREATER THAN 8 SECOND")
             params['result_head'] = "sleeping"
+            params["list_head_time_stamp"].append(params['head_time_stamp'][-1])
+            params["last_head_down_trigger_time"] = ut.get_current_time()
+            params["last_critical_head_down_duration"] = str(params['head_time_stamp'][-1] - params['head_time_stamp'][0])[:4] + " seconds"
     params['head_time_stamp'] = []
     return params

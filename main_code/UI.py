@@ -17,10 +17,10 @@ from tkinter import filedialog
 from tkinter.filedialog import asksaveasfile
 from tkinter import ttk
 # import hack
-
+from datetime import datetime
 import sys
 
-ctypes.windll.shcore.SetProcessDpiAwareness(1)
+# ctypes.windll.shcore.SetProcessDpiAwareness(1)
 
 root = Tk()
 root.resizable(False, False)
@@ -181,7 +181,14 @@ def display():
         'ref_epoch': 0,
         'result_eye': "",
         'result_mouth': "",
-        'result_head': ""
+        'result_head': "",
+        "last_blink_trigger_time" : "You are Energetic",
+        "last_critical_blink_duration" : "You are Energetic",
+        "last_yawn_trigger_time": "You are Energetic",
+        "last_critical_yawn_duration": "You are Energetic",
+        "last_head_down_trigger_time": "You are Energetic",
+        "last_critical_head_down_duration": "You are Energetic",
+        "list_head_time_stamp" : []
     }
     debug_bool = True
     radius = 2
@@ -317,55 +324,46 @@ def display():
             # design parameters
             safe_color = (56, 242, 130)
             danger_color = (0, 0, 255)
+            font_family = cv2.FONT_HERSHEY_TRIPLEX
+            font_size = 0.5
 
             cv2.putText(canvas, "Head : " + params['head_text_1'],
-                        (20, 50), cv2.FONT_HERSHEY_PLAIN, 2, safe_color, 1)
+                        (20, 50), font_family, 1, safe_color, 1)
             cv2.putText(canvas, "wearing : " + params['glass_text'],
-                        (20, 100), cv2.FONT_HERSHEY_PLAIN, 2, safe_color, 1)
-            cv2.putText(canvas, "Eye Ratio : " + str(params['eye_ratio']), (20, 150), cv2.FONT_HERSHEY_PLAIN, 2,
+                        (20, 100), font_family, 1, safe_color, 1)
+            cv2.putText(canvas, "Eye Ratio : " + str(params['eye_ratio']), (20, 150), font_family, 1,
                         safe_color, 1)
-            cv2.putText(canvas, "Mouth Ratio : " + str(params['mouth_ratio']), (20, 200), cv2.FONT_HERSHEY_PLAIN, 2,
+            cv2.putText(canvas, "Mouth Ratio : " + str(params['mouth_ratio']), (20, 200), font_family, 1,
                         safe_color, 1)
 
             # $$____$$   Cal_img
             # Eye
-            cv2.putText(Eye_val_img, " Blink Trigger Time  : " + str(
-                params['eye_close_time_stamp']), (40, 30), cv2.FONT_HERSHEY_PLAIN, 2, safe_color, 1)
-            cv2.putText(Eye_val_img, " Eye Blink Time : " + str(time.time() - params['eye_close_time_stamp']), (40, 90), cv2.FONT_HERSHEY_PLAIN,
-                        2, safe_color, 1)
-            cv2.putText(Eye_val_img, " Blink count : " + str(len(params['eye_blink_stamp'])), (40, 150),
-                        cv2.FONT_HERSHEY_PLAIN,
-                        2, safe_color, 1)
+
+            cv2.putText(Eye_val_img, "Last Blink Trigger Time  : " + params["last_blink_trigger_time"], (50, 30), font_family, font_size, safe_color, 1)
+            cv2.putText(Eye_val_img, "Last Critical Blink Duration : " + params["last_critical_blink_duration"], (50, 90), font_family,
+                        font_size, safe_color, 1)
+            cv2.putText(Eye_val_img, " Blink count : " + str(len(params['eye_blink_stamp'])), (50, 150),
+                        font_family,
+                        font_size, safe_color, 1)
             # Mouth
-            cv2.putText(Mouth_val_img, " Yawn Trigger Time  : " + str(params['mouth_open_time_stamp']), (40, 30),
-                        cv2.FONT_HERSHEY_PLAIN, 2, safe_color, 1)
-            cv2.putText(Mouth_val_img, " Yawn Time : " + str(time.time() - params['mouth_open_time_stamp']), (40, 90),
-                        cv2.FONT_HERSHEY_PLAIN,
-                        2, safe_color, 1)
-            cv2.putText(Mouth_val_img, " Yawn count : " + str(len(params['mouth_yawn_stamp'])), (40, 150),
-                        cv2.FONT_HERSHEY_PLAIN,
-                        2, safe_color, 1)
+            cv2.putText(Mouth_val_img, "Last Yawn Trigger Time  : " + params['last_yawn_trigger_time'], (50, 30),
+                        font_family, font_size, safe_color, 1)
+            cv2.putText(Mouth_val_img, "Last Critical Yawn Time : " + params["last_critical_yawn_duration"], (50, 90),
+                        font_family,
+                        font_size, safe_color, 1)
+            cv2.putText(Mouth_val_img, " Yawn count : " + str(len(params['mouth_yawn_stamp'])), (50, 150),
+                        font_family,
+                        font_size, safe_color, 1)
             # Head
-            cv2.putText(Head_val_img, " Head Down Trigger Time  : " + str(params['head_down_time_stamp']), (40, 30),
-                        cv2.FONT_HERSHEY_PLAIN, 2, safe_color, 1)
-            cv2.putText(Head_val_img, " Head Down Time : " + str(time.time() - params['head_down_time_stamp']), (40, 90),
-                        cv2.FONT_HERSHEY_PLAIN,
-                        2, safe_color, 1)
-            cv2.putText(Head_val_img, " Head Down count : " + str(len(params['head_time_stamp'])), (40, 150),
-                        cv2.FONT_HERSHEY_PLAIN,
-                        2, safe_color, 1)
 
-        # $$___$$    Windows
-
-        # cv2.imshow('canvas', canvas)
-        # cv2.imshow('head image', head_img)
-        # cv2.imshow('person', original_frame)
-        # cv2.imshow('facemesh_tesselation', cv2.flip(facemesh_tesselation, 1))
-        # cv2.imshow('facemesh_contours', cv2.flip(facemesh_contours, 1))
-        # cv2.imshow('eye_graph_canvas', graph_eye_canvas)
-        # cv2.imshow('mouth_graph_canvas', graph_mouth_canvas)
-
-        ### UI section starts ###
+            cv2.putText(Head_val_img, "Last Head Down Trigger Time  : " + params["last_head_down_trigger_time"], (50, 30),
+                        font_family, font_size, safe_color, 1)
+            cv2.putText(Head_val_img, "Last Critical Head Down Time : " + params["last_critical_head_down_duration"], (50, 90),
+                        font_family,
+                        font_size, safe_color, 1)
+            cv2.putText(Head_val_img, "Head Down count : " + str(len(params["list_head_time_stamp"])), (50, 150),
+                        font_family,
+                        font_size, safe_color, 1)
 
             # cropped Face image
             cropped_face = head_img
