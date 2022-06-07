@@ -72,20 +72,52 @@ with mp_face_mesh.FaceMesh(
             cropped = sr.upsample(cropped)
             cropped = cv.cvtColor(cropped, cv.COLOR_RGB2GRAY)
             cropped = cv.equalizeHist(cropped)
-            # THRESHOLDING
+
             image = cropped
-            # image = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
-            print(image.shape)
-            sauvola = threshold_sauvola(image, window_size=25)
-            # binary_sauvola = image > thresh_sauvola
-            adaptive = cv.adaptiveThreshold(cropped, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 15, -2)
-            _, binary = cv.threshold(cropped, 100, 255, cv.THRESH_BINARY)
-            _, otsu = cv.threshold(cropped, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)
+
+            # image = cv.cvtColor(image,cv.COLOR_RGB2GRAY)
+            print("Shape of cropped window",image.shape)
+            # Smoothing
+            kernel = np.ones((3, 3), np.float32) / 9
+            image = cv.morphologyEx(image, cv.MORPH_OPEN, kernel)
+            # image = cv.filter2D(image, -1, kernel)
+            # image = cv.blur(image, (5, 5))
+            # image = cv.GaussianBlur(image, (5, 5), 0)
+            # image = cv.medianBlur(image, 3)
+            image = cv.bilateralFilter(image,3, 75, 75)
+
+            # THRESHOLDING
+            # sauvola = threshold_sauvola(image, window_size=25)
+            # adaptive = cv.adaptiveThreshold(image, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 15, -2)
+            _, binary = cv.threshold(image, 100, 255, cv.THRESH_BINARY)
+            _, otsu = cv.threshold(image, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)
+            contours, hierarchy = cv.findContours(otsu, 1, 2)
+            otsu = cv.resize(otsu,(100,50),interpolation=cv.INTER_NEAREST)
+            print(len(contours))
+            for i in contours:
+                area = cv.contourArea(i)
+                if area > 1000:
+                    rect = cv.minAreaRect(i)
+                    box = cv.boxPoints(rect)
+                    box = np.int0(box)
+                    # otsu = cv.drawContours(otsu, [box], -1, (0, 255, 0), 2)
+                    print(area)
+
+                else:
+                    epsilon = 0.1 * cv.arcLength(i, True)
+                    approx = cv.approxPolyDP(i, epsilon, True)
+                    otsu =cv.fillPoly(otsu, [approx], color=(255, 255, 255))
+            # Black pixel count
+            count = cv.countNonZero(otsu)
+            print(" zero count", otsu.size - count)
+
+
         cv.imshow('Frame', frame)
-        cv.imshow("mask",mask)
-        cv.imshow('res',res)
-        cv.imshow('new', cropped)
+        # cv.imshow("mask",mask)
+        # cv.imshow('res',res)
+        # cv.imshow('new', cropped)
         cv.imshow('Threshold',otsu)
+
         key = cv.waitKey(1)
         if key == ord('q'):
             break
