@@ -90,16 +90,15 @@ with mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence
                     x2, y2 = rect_end_point[0], rect_end_point[1]
                     img_original = img_original[y1 - 100:y2 + 100, x1 - 90:x2 + 90]
                     img_original = cv.resize(img_original, (500,500))
-                box,contour_count,contour_frame,Area,width,height,new = iris_seg.main(img_original)
-                # new = np.zeros(img_original.shape[:2], np.uint8)
-                # new = cv.drawContours(new,[box], -1, (255, 0, 0), 1)
+                box,contour_count,contour_frame,Area,width,height = iris_seg.main(img_original)
+                new = np.zeros(img_original.shape[:2], np.uint8)
+                new = cv.drawContours(new,[box], -1, (255, 0, 0), 1)
                 print(contour_count)
-                # print(Area)
+                print(Area)
                 print(height)
 
                 if height <= 8:
                     Blink_count += 1
-                    print("funfidsnfd")
                     cv.putText(contour_frame,"__Blink__",(50,50),cv.FONT_HERSHEY_TRIPLEX,1,(0,255,0),2)
                 cv.putText(contour_frame,str(Blink_count), (50, 100), cv.FONT_HERSHEY_TRIPLEX, 1, (0, 255, 0), 2)
 
@@ -108,8 +107,6 @@ with mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence
         cv.imshow('img_original', img_original)
         cv.imshow("new", new)
         cv.imshow('res', contour_frame)
-        # cv.imshow('new', cropped)
-        # cv.imshow('Threshold',ots)
 
         key = cv.waitKey(1)
         if key == ord('q'):
