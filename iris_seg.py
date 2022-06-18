@@ -45,14 +45,19 @@ def main(frame):
         ret, thresh = cv.threshold(mask, 127, 255, 0)
         contours, hierarchy = cv.findContours(thresh, 1, 2)
         contour_count = len(contours)
-        print(contour_count)
-
+        # print(contour_count)
+        total = 0
         for i in contours:
             # epsilon = 0.1 * cv.arcLength(i, True)
             # approx = cv.approxPolyDP(i, epsilon, True)
             rect = cv.minAreaRect(i)
             area = cv.contourArea(i)
+            _, _, w, h = cv.boundingRect(i)
+            total += area
             print("Area :",area)
             box = cv.boxPoints(rect)
             box = np.int0(box)
-    return box,contour_count,frame
+
+        Area = total/contour_count
+
+    return box,contour_count,frame,Area,w,h
