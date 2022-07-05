@@ -20,7 +20,7 @@ from tkinter import ttk
 from datetime import datetime
 import sys
 
-# ctypes.windll.shcore.SetProcessDpiAwareness(1)
+ctypes.windll.shcore.SetProcessDpiAwareness(1)
 
 root = Tk()
 root.resizable(False, False)
