@@ -56,6 +56,7 @@ ft_color = (57, 181, 74)
 
 with mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence=0.5) as face_detection:
     cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+    # cap = cv2.VideoCapture('video_2022-07-07_08-43-26.mp4')
     while cap.isOpened():
         success, image = cap.read()
         original_frame = image.copy()
@@ -77,9 +78,9 @@ with mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence
         graph_mouth_canvas = np.zeros(
             [60 * scale_graph, 60 * scale_graph, 3], dtype=np.uint8)
         graph_mouth_canvas.fill(0)
-        eye_frame = np.zeros([300, 150, 3], dtype=np.uint8)
+        eye_frame = np.zeros([150, 300, 3], dtype=np.uint8)
         eye_frame.fill(255)
-        mouth_frame = np.zeros([300, 150, 3], dtype=np.uint8)
+        mouth_frame = np.zeros([150, 300, 3], dtype=np.uint8)
         mouth_frame.fill(255)
         try:
             results = face_detection.process(image)
@@ -90,8 +91,22 @@ with mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence
                         image, detection)
                     x1, y1 = rect_start_point[0], rect_start_point[1]
                     x2, y2 = rect_end_point[0], rect_end_point[1]
-                    img_original = img_original[y1 -
-                                                100:y2 + 100, x1 - 90:x2 + 90]
+                    height = img_original.shape[0]
+                    width = img_original.shape[1]
+                    print(f"width : {width} and height : {height}")
+                    Y1 = y1 - 100
+                    if y1 - 100 < 0:
+                        Y1 = 0
+                    Y2 = y2 + 100
+                    if y2 + 100 > height:
+                        Y2 = height
+                    X1 = x1 - 90
+                    if x1 - 90 < 0:
+                        X1 = 0
+                    X2 = x2 + 90
+                    if X2 > width:
+                        X2 = width
+                    img_original = img_original[Y1:Y2, X1:X2]
                     img_original = cv2.resize(img_original, (300, 300))
                     if time.time() - start_time_glass > 10:
                         start_time_glass = time.time()
@@ -100,7 +115,7 @@ with mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence
                     params['head_text_1'], head_img, facemesh_tesselation, facemesh_contours, head_bound = head_hack.main(
                         img_original.copy())
                     params['head_text_2'], head_x, head_y = head_main.main(
-                        original_frame.copy())
+                        img_original.copy())
                     if params['head_text_1'] == "processing head" and params['head_text_2'] == "Looking Up":
                         params['head_text_1'] = "Looking Up"
                     params['mouth_ratio'], params['eye_ratio'], eye_frame, mouth_frame = yawn_and_eye.main(

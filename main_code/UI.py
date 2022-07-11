@@ -20,7 +20,7 @@ from tkinter import ttk
 from datetime import datetime
 import sys
 
-ctypes.windll.shcore.SetProcessDpiAwareness(1)
+# ctypes.windll.shcore.SetProcessDpiAwareness(1)
 
 root = Tk()
 root.resizable(False, False)
@@ -233,9 +233,9 @@ def display():
             graph_mouth_canvas = np.zeros(
                 [60 * scale_graph, 60 * scale_graph, 3], dtype=np.uint8)
             graph_mouth_canvas.fill(0)
-            eye_frame = np.zeros([300, 150, 3], dtype=np.uint8)
+            eye_frame = np.zeros([150, 300, 3], dtype=np.uint8)
             eye_frame.fill(0)
-            mouth_frame = np.zeros([300, 150, 3], dtype=np.uint8)
+            mouth_frame = np.zeros([150, 300, 3], dtype=np.uint8)
             mouth_frame.fill(0)
             Eye_val_img = np.zeros([300, 600, 3], dtype=np.uint8)
             Eye_val_img.fill(0)
@@ -243,83 +243,97 @@ def display():
             Mouth_val_img.fill(0)
             Head_val_img = np.zeros([300, 600, 3], dtype=np.uint8)
             Head_val_img.fill(0)
-            try:
-                results = face_detection.process(image)
-                img_original = image.copy()
-                if results.detections:
-                    for detection in results.detections:
-                        rect_start_point, rect_end_point = utils.get_roi_face(
-                            image, detection)
-                        x1, y1 = rect_start_point[0], rect_start_point[1]
-                        x2, y2 = rect_end_point[0], rect_end_point[1]
-                        img_original = img_original[y1 -
-                                                    100:y2 + 100, x1 - 90:x2 + 90]
-                        img_original = cv2.resize(img_original, (300, 300))
-                        if time.time() - start_time_glass > 10:
-                            start_time_glass = time.time()
-                            # glass_text = glass_main.main(img_original.copy())
-                            # params['glass_text'] = glass_text
-                        params['head_text_1'], head_img, facemesh_tesselation, facemesh_contours, head_bound = head_hack.main(
-                            img_original.copy())
-                        params['head_text_2'], head_x, head_y = head_main.main(
-                            original_frame.copy())
-                        if params['head_text_1'] == "processing head" and params['head_text_2'] == "Looking Up":
-                            params['head_text_1'] = "Looking Up"
-                        params['mouth_ratio'], params['eye_ratio'], eye_frame, mouth_frame = yawn_and_eye.main(
-                            img_original.copy(), eye_frame, mouth_frame)
-                        eye_frame = cv2.flip(cv2.cvtColor(
-                            eye_frame, cv2.COLOR_BGR2RGB), 1)
-                        mouth_frame = cv2.flip(cv2.cvtColor(
-                            mouth_frame, cv2.COLOR_BGR2RGB), 1)
+            # try:
+            results = face_detection.process(image)
+            img_original = image.copy()
+            if results.detections:
+                for detection in results.detections:
+                    rect_start_point, rect_end_point = utils.get_roi_face(
+                        image, detection)
+                    x1, y1 = rect_start_point[0], rect_start_point[1]
+                    x2, y2 = rect_end_point[0], rect_end_point[1]
+                    height = img_original.shape[0]
+                    width = img_original.shape[1]
+                    print(f"width : {width} and height : {height}")
+                    Y1 = y1 - 100
+                    if y1 - 100 < 0:
+                        Y1 = 0
+                    Y2 = y2 + 100
+                    if y2 + 100 > height:
+                        Y2 = height
+                    X1 = x1 - 90
+                    if x1 - 90 < 0:
+                        X1 = 0
+                    X2 = x2 + 90
+                    if X2 > width:
+                        X2 = width
+                    img_original = img_original[Y1:Y2, X1:X2]
+                    img_original = cv2.resize(img_original, (300, 300))
+                    if time.time() - start_time_glass > 10:
+                        start_time_glass = time.time()
+                        # glass_text = glass_main.main(img_original.copy())
+                        # params['glass_text'] = glass_text
+                    params['head_text_1'], head_img, facemesh_tesselation, facemesh_contours, head_bound = head_hack.main(
+                        img_original.copy())
+                    params['head_text_2'], head_x, head_y = head_main.main(
+                        original_frame.copy())
+                    if params['head_text_1'] == "processing head" and params['head_text_2'] == "Looking Up":
+                        params['head_text_1'] = "Looking Up"
+                    params['mouth_ratio'], params['eye_ratio'], eye_frame, mouth_frame = yawn_and_eye.main(
+                        img_original.copy(), eye_frame, mouth_frame)
+                    eye_frame = cv2.flip(cv2.cvtColor(
+                        eye_frame, cv2.COLOR_BGR2RGB), 1)
+                    mouth_frame = cv2.flip(cv2.cvtColor(
+                        mouth_frame, cv2.COLOR_BGR2RGB), 1)
 
-                        graph_eye.update_frame(
-                            int(params['eye_ratio'] / 2) * scale_graph_line)
-                        graph_eye_canvas = graph_eye.get_graph()
-                        graph_eye_canvas[:150, :] = eye_frame
-                        graph_eye_canvas = cv2.line(
-                            graph_eye_canvas, (0, 200), (300, 200), (0, 0, 255), thickness=2)
+                    graph_eye.update_frame(
+                        int(params['eye_ratio'] / 2) * scale_graph_line)
+                    graph_eye_canvas = graph_eye.get_graph()
+                    graph_eye_canvas[:150, :] = eye_frame
+                    graph_eye_canvas = cv2.line(
+                        graph_eye_canvas, (0, 200), (300, 200), (0, 0, 255), thickness=2)
 
-                        graph_mouth.update_frame(
-                            int(params['mouth_ratio'] / 11) * scale_graph_line)
-                        graph_mouth_canvas = graph_mouth.get_graph()
-                        graph_mouth_canvas[:150, :] = mouth_frame
-                        graph_mouth_canvas = cv2.line(
-                            graph_mouth_canvas, (0, 200), (300, 200), (0, 0, 255), thickness=2)
+                    graph_mouth.update_frame(
+                        int(params['mouth_ratio'] / 11) * scale_graph_line)
+                    graph_mouth_canvas = graph_mouth.get_graph()
+                    graph_mouth_canvas[:150, :] = mouth_frame
+                    graph_mouth_canvas = cv2.line(
+                        graph_mouth_canvas, (0, 200), (300, 200), (0, 0, 255), thickness=2)
 
-                        params = core.eye_main(params)
-                        params = calculate.eye_calculate_main(params)
-                        params = core.mouth_main(params)
-                        params = calculate.mouth_calculate_main(params)
-                        params = core.head_main(params)
-                        params = calculate.head_calculate_main(params)
-                        original_frame = cv2.flip(original_frame, 1)
-                        if params['result_eye'] == 'sleeping' or params['result_head'] == 'sleeping':
-                            cv2.putText(original_frame, 'sleeping', (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
-                                        (0, 0, 255), 2)
-                            counter_sleep = counter_sleep + 1
-                        elif params['result_eye'] == "drowsiness" or params['result_mouth'] == "drowsiness":
-                            cv2.putText(original_frame, "drowsiness", (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
-                                        (0, 0, 255), 2)
-                            counter_drowsiness = counter_drowsiness + 1
-                        if 100 > counter_sleep > 0:
-                            cv2.putText(original_frame, 'sleeping', (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
-                                        (0, 0, 255), 2)
-                            counter_sleep = counter_sleep + 1
-                        elif 100 > counter_drowsiness > 0:
-                            cv2.putText(original_frame, "drowsiness", (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
-                                        (0, 0, 255), 2)
-                            counter_drowsiness = counter_drowsiness + 1
-                        if counter_drowsiness > 100:
-                            counter_drowsiness = 0
-                        if counter_sleep > 100:
-                            counter_sleep = 0
-            except Exception as e:
-                print(f"error : {e}")
-                params['head_text'] = 'processing head'
-                params['glass_text'] = 'processing glass'
-                params['person_text'] = 'processing person'
-                params['eye_ratio'] = 'processing eye'
-                params['mouth_ratio'] = 'processing mouth'
+                    params = core.eye_main(params)
+                    params = calculate.eye_calculate_main(params)
+                    params = core.mouth_main(params)
+                    params = calculate.mouth_calculate_main(params)
+                    params = core.head_main(params)
+                    params = calculate.head_calculate_main(params)
+                    original_frame = cv2.flip(original_frame, 1)
+                    if params['result_eye'] == 'sleeping' or params['result_head'] == 'sleeping':
+                        cv2.putText(original_frame, 'sleeping', (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                                    (0, 0, 255), 2)
+                        counter_sleep = counter_sleep + 1
+                    elif params['result_eye'] == "drowsiness" or params['result_mouth'] == "drowsiness":
+                        cv2.putText(original_frame, "drowsiness", (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                                    (0, 0, 255), 2)
+                        counter_drowsiness = counter_drowsiness + 1
+                    if 100 > counter_sleep > 0:
+                        cv2.putText(original_frame, 'sleeping', (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                                    (0, 0, 255), 2)
+                        counter_sleep = counter_sleep + 1
+                    elif 100 > counter_drowsiness > 0:
+                        cv2.putText(original_frame, "drowsiness", (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                                    (0, 0, 255), 2)
+                        counter_drowsiness = counter_drowsiness + 1
+                    if counter_drowsiness > 100:
+                        counter_drowsiness = 0
+                    if counter_sleep > 100:
+                        counter_sleep = 0
+            # except Exception as e:
+            #     print(f"error : {e}")
+            #     params['head_text'] = 'processing head'
+            #     params['glass_text'] = 'processing glass'
+            #     params['person_text'] = 'processing person'
+            #     params['eye_ratio'] = 'processing eye'
+            #     params['mouth_ratio'] = 'processing mouth'
 
             # design parameters
             safe_color = (56, 242, 130)

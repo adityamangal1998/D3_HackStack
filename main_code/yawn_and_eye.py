@@ -182,4 +182,4 @@ def main(frame,eye_frame,mouth_frame):
         print(f"error : {e}")
         eye_ratio = 0
         mouth_ratio = 0
-        return mouth_ratio, eye_frame,mouth_frame
+        return mouth_ratio, eye_ratio,eye_frame,mouth_frame
